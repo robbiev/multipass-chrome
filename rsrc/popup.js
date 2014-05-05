@@ -10,7 +10,7 @@ var Login = React.createClass({
         //var p = document.createElement("p")
         //p.innerText = resp.Success
         //document.body.appendChild(p)
-        if (resp.Success) {
+        if (!resp.Success) {
           console.log("update auth")
           that.props.updateAuth(true)
         }
@@ -19,13 +19,17 @@ var Login = React.createClass({
     }
   },
   render: function() {
-    return <input type="password" onKeyDown={this.handleChange} />;
+    return (<span><p>Enter your password</p>
+            <input type="password" onKeyDown={this.handleChange} /></span>);
   }
 })
 
 var List = React.createClass({
   render: function() {
-    return <p>list</p>;
+    return <ul>
+      <li>logins</li>
+      <li>passwords</li>
+    </ul>;
   }
 })
 
