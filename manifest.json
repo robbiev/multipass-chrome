@@ -17,10 +17,10 @@
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
-        "windows": "Ctrl+Shift+m",
-        "mac": "Ctrl+Shift+m",
-        "chromeos": "Ctrl+Shift+m",
-        "linux": "Ctrl+Shift+m"
+        "windows": "Ctrl+M",
+        "mac": "Ctrl+M",
+        "chromeos": "Ctrl+M",
+        "linux": "Ctrl+M"
       }
     }
   },
