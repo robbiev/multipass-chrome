@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "multipass",
   "version": "1.0",
-  "description": "1Password keychain access",
+  "description": "Unofficial 1Password keychain access on Linux",
   "author": "Robbie Vanbrabant",
 
   "background": {
@@ -13,6 +13,12 @@
     "nativeMessaging",
     "https://*/*"
   ],
+
+  "icons": { 
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png" 
+  },
 
   "commands": {
     "_execute_browser_action": {
@@ -26,6 +32,10 @@
   },
 
   "browser_action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+     "default_icon": {
+       "19": "icon19.png",
+       "38": "icon38.png"
+     }
   }
 }
