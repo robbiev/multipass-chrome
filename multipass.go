@@ -12,14 +12,28 @@ import (
 
 type LoginResponse struct {
 	Success bool
+	Items   []multipass.Item
 }
 
 func login(password []byte) LoginResponse {
 	home := os.Getenv("HOME")
 	onePasswordDir := path.Join(home, "/Dropbox/1password/1Password.agilekeychain/data/default")
 	keyChain := multipass.NewAgileKeyChain(onePasswordDir)
+	defer keyChain.Close()
 	err := keyChain.Open(password)
-	return LoginResponse{Success: err == nil}
+	response := LoginResponse{Success: err == nil}
+	if err == nil {
+		var items []multipass.Item
+		keyChain.ForEachItem(func(p string, f []byte) error {
+			item, err := multipass.DecryptFile(f, keyChain.Keys())
+			if err == nil {
+				items = append(items, item)
+			}
+			return nil
+		})
+		response.Items = items
+	}
+	return response
 }
 
 func main() {

@@ -10,9 +10,11 @@ var Login = React.createClass({
         //var p = document.createElement("p")
         //p.innerText = resp.Success
         //document.body.appendChild(p)
-        if (!resp.Success) {
+        if (resp.Success) {
           console.log("update auth")
-          that.props.updateAuth(true)
+          that.props.updateAuth(true, resp.Items)
+          console.log(JSON.stringify(resp.Items, null, 4))
+          //that.props.updateData()
         }
         target.value = ''
       }) 
@@ -24,37 +26,47 @@ var Login = React.createClass({
   }
 })
 
+var Item = React.createClass({
+  render: function() {
+    return <span>{this.props.title}</span>
+  }
+});
+
 var List = React.createClass({
   render: function() {
-    return <ul>
-      <li>logins</li>
-      <li>passwords</li>
-    </ul>;
+    this.props.data = this.props.data || []
+    var items = this.props.data.map(function (item) {
+      return <li><Item title={item.Title} /></li>;
+    });
+    return <ul>{items}</ul>;
   }
-})
+});
 
 var Main = React.createClass({
   getInitialState: function() {
     return {
-      authenticated: false
+      authenticated: false,
+      data: []
     };
   },
-  updateAuth: function(status) {
+  updateAuth: function(status, data) {
     this.setState({
-      authenticated: status
+      authenticated: status,
+      data: data
     });
   },
   render: function() {
     return (
       <div>
-        {this.state.authenticated ? <List /> : <Login updateAuth={this.updateAuth} />}
+        {this.state.authenticated ? <List data={this.state.data}/> : <Login updateAuth={this.updateAuth} />}
       </div>
     );
   }
 });
 
+
 /** @jsx React.DOM */
 React.renderComponent(
-  Main({}),
+  <Main />,
   document.getElementById('body')
 )
