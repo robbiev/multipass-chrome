@@ -18,7 +18,9 @@ else
   else
     # Doesn't work on Chrome 33 on ubuntu
     # https://stackoverflow.com/questions/22568473/npapi-replacement-native-messaging-host-for-invoking-external-application-not
-    TARGET_DIR="$HOME/.config/google-chrome/NativeMessagingHosts"
+    #TARGET_DIR="$HOME/.config/google-chrome/NativeMessagingHosts"
+    echo "failed: run as root (sudo ...)"
+    exit 1
   fi
 fi
 
@@ -33,7 +35,7 @@ cp "$DIR/$HOST_NAME.json" "$TARGET_DIR"
 # Update host path in the manifest.
 HOST_PATH=$DIR/multipass
 ESCAPED_HOST_PATH=${HOST_PATH////\\/}
-sed -i -e "s/HOST_PATH/$ESCAPED_HOST_PATH/" "$TARGET_DIR/$HOST_NAME.json"
+sed -i -e "s/%replace%/$ESCAPED_HOST_PATH/" "$TARGET_DIR/$HOST_NAME.json"
 
 # Set permissions for the manifest so that all users can read it.
 chmod o+r "$TARGET_DIR/$HOST_NAME.json"

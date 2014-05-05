@@ -1,7 +1,7 @@
 {
   "name": "org.garbagecollected.multipass",
   "description": "multipass",
-  "path": "/home/robbie/go/src/github.com/robbiev/multipass-chrome/multipass",
+  "path": "%replace%",
   "type": "stdio",
   "allowed_origins": [
     "chrome-extension://lfobladhlhilkbckohddiackhgobfngj/"
