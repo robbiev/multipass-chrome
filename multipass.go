@@ -2,10 +2,39 @@ package main
 
 import (
 	"encoding/binary"
+	"encoding/json"
+	"log"
 	"os"
+	"path"
+
+	"github.com/robbiev/multipass"
 )
 
+type LoginResponse struct {
+	Success bool
+}
+
+func login(password []byte) LoginResponse {
+	home := os.Getenv("HOME")
+	onePasswordDir := path.Join(home, "/Dropbox/1password/1Password.agilekeychain/data/default")
+	keyChain := multipass.NewAgileKeyChain(onePasswordDir)
+	err := keyChain.Open(password)
+	return LoginResponse{Success: err == nil}
+}
+
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Recovered in f", r)
+		}
+	}()
+
+	f, err := os.OpenFile("/Users/robbie/code/multipass-chrome/log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		return
+	}
+	//defer f.Close()
+	log.SetOutput(f)
 	for {
 		// get message length, 4 bytes
 		var length uint32
@@ -21,10 +50,32 @@ func main() {
 			break
 		}
 
+		log.Println("read message")
+		log.Println(string(message))
+
+		type Command struct {
+			Action  string
+			Payload interface{}
+		}
+
+		var command Command
+		json.Unmarshal(message, &command)
+		payload := command.Payload.(map[string]interface{})
+
+		password := []byte(payload["Password"].(string))
+		response := login(password)
+
+		encoded, _ := json.Marshal(response)
+
+		log.Println(string(encoded))
+		log.Println(len(encoded))
+
 		// simply echo the message back
-		binary.Write(os.Stdout, binary.LittleEndian, length)
-		_, er := os.Stdout.Write(message)
+		binary.Write(os.Stdout, binary.LittleEndian, uint32(len(encoded)))
+
+		_, er := os.Stdout.Write(encoded)
 		if er != nil {
+			log.Println(er)
 			break
 		}
 	}
