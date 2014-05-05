@@ -3,13 +3,10 @@ var Login = React.createClass({
   handleChange: function(event) {
     if (event.keyCode == 13) { 
       //event.preventDefault()
-      console.log("event enter " + event.target.value)
+      console.log("event enter")
       var that = this
       var target = event.target
       chrome.extension.getBackgroundPage().login(event.target.value, function(resp) {
-        //var p = document.createElement("p")
-        //p.innerText = resp.Success
-        //document.body.appendChild(p)
         if (resp.Success) {
           console.log("update auth")
           that.props.updateAuth(true, resp.Items)

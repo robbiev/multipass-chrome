@@ -43,7 +43,7 @@ func main() {
 		}
 	}()
 
-	f, err := os.OpenFile("/Users/robbie/code/multipass-chrome/log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile("/home/robbie/log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return
 	}

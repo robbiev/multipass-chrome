@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 2013 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -16,6 +16,8 @@ else
   if [ "$(whoami)" == "root" ]; then
     TARGET_DIR="/etc/opt/chrome/native-messaging-hosts"
   else
+    # Doesn't work on Chrome 33 on ubuntu
+    # https://stackoverflow.com/questions/22568473/npapi-replacement-native-messaging-host-for-invoking-external-application-not
     TARGET_DIR="$HOME/.config/google-chrome/NativeMessagingHosts"
   fi
 fi
