@@ -27,8 +27,11 @@ var Login = React.createClass({
 })
 
 var Item = React.createClass({
+  copyPassword: function(event) {
+    chrome.extension.getBackgroundPage().copy(this.props.password)
+  },
   render: function() {
-    return (<span>{this.props.title}, {this.props.user}</span>);
+    return (<div>{this.props.title} | {this.props.user} <button onClick={this.copyPassword}>password</button></div>);
   }
 });
 
@@ -52,19 +55,23 @@ var List = React.createClass({
     var isWebform = function(item) {
       return item.TypeName === 'webforms.WebForm'
     }
+    var getDesignation = function(payload, designation) {
+      var userField = payload.fields.filter(function(f) { return f.designation === designation}).map(function(f) {return f.value})
+      var user = '<unknown>'
+      if (userField.length > 0) {
+        user = userField[0]
+      }
+      return user
+    }
 
     var items = this.props.data.filter(isWebform).map(function (item) {
       console.log('parse '+item.Title)
       var payload = JSON.parse(item.Payload)
       var fields = payload.fields || []
-      var userField = payload.fields.filter(function(f) { return f.designation === 'username'}).map(function(f) {return f.value})
-      var user = '<unknown>'
-      if (userField.length > 0) {
-        user = userField[0]
-      }
-      //var user = 'test'
+      var user = getDesignation(payload, 'username')
+      var password = getDesignation(payload, 'password')
       console.log('end parse '+item.Title)
-      return { title: item.Title, user: user }
+      return { title: item.Title, user: user, password: password }
     });
 
     this.setState({ items: items })
@@ -80,7 +87,7 @@ var List = React.createClass({
       return show
     }
     var items = this.state.items.filter(isInFilter).map(function (item) {
-      return <li><Item title={item.title} user={item.user}/></li>;
+      return <li><Item title={item.title} user={item.user} password={item.password}/></li>;
     });
     return <ul>{items}</ul>;
   }

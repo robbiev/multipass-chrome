@@ -20,7 +20,7 @@ function login(password, callback) {
   chrome.runtime.sendNativeMessage('org.garbagecollected.multipass', { Action: "login", Payload: { Password: password } }, callback);
 }
 
-var toClipboard = function(str) {
+function copy(str) {
   var sandbox = document.getElementById('sandbox')
   sandbox.value = str
   sandbox.select()
