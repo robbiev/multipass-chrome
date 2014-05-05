@@ -6,8 +6,7 @@
   "author": "Robbie Vanbrabant",
 
   "background": {
-    "page": "background.html",
-    "persistent": false
+    "page": "background.html"
   },
 
   "permissions": [
