@@ -28,15 +28,28 @@ var Login = React.createClass({
 
 var Item = React.createClass({
   render: function() {
-    return <span>{this.props.title}</span>
+    return <span>{this.props.title}, {this.props.user}</span>
   }
 });
 
 var List = React.createClass({
   render: function() {
     this.props.data = this.props.data || []
-    var items = this.props.data.map(function (item) {
-      return <li><Item title={item.Title} /></li>;
+    var isWebform = function(item) {
+      return item.TypeName === 'webforms.WebForm'
+    }
+    var items = this.props.data.filter(isWebform).map(function (item) {
+      console.log('parse '+item.Title)
+      var payload = JSON.parse(item.Payload)
+      var fields = payload.fields || []
+      var userField = payload.fields.filter(function(f) { return f.designation === 'username'}).map(function(f) {return f.value})
+      var user = '<unknown>'
+      if (userField.length > 0) {
+        user = userField[0]
+      }
+      //var user = 'test'
+      console.log('end parse '+item.Title)
+      return <li><Item title={item.Title} user={user}/></li>;
     });
     return <ul>{items}</ul>;
   }
