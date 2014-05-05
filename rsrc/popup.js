@@ -37,22 +37,22 @@ var Search = React.createClass({
     this.props.updateFilter(event.target.value);
   },
   render: function() {
-    return <span><input type="text" onKeyDown={this.handleChange} /></span>
+    return <span><input type="text" onChange={this.handleChange} /></span>
   }
 });
 
 var List = React.createClass({
-  render: function() {
+  getInitialState: function() {
+    return {
+      items: []
+    };
+  },
+  componentWillMount: function() {
     this.props.data = this.props.data || []
-    this.props.filterText = this.props.filterText || ''
-    var that = this
     var isWebform = function(item) {
-      var show = true
-      if (that.props.filterText) {
-        show = (item.Title.toLowerCase().indexOf(that.props.filterText.toLowerCase())) > -1
-      }
-      return show && item.TypeName === 'webforms.WebForm'
+      return item.TypeName === 'webforms.WebForm'
     }
+
     var items = this.props.data.filter(isWebform).map(function (item) {
       console.log('parse '+item.Title)
       var payload = JSON.parse(item.Payload)
@@ -64,7 +64,23 @@ var List = React.createClass({
       }
       //var user = 'test'
       console.log('end parse '+item.Title)
-      return <li><Item title={item.Title} user={user}/></li>;
+      return { title: item.Title, user: user }
+    });
+
+    this.setState({ items: items })
+  },
+  render: function() {
+    this.props.filterText = this.props.filterText || ''
+    var that = this
+    var isInFilter = function(item) {
+      var show = true
+      if (that.props.filterText) {
+        show = (item.title.toLowerCase().indexOf(that.props.filterText.toLowerCase())) > -1
+      }
+      return show
+    }
+    var items = this.state.items.filter(isInFilter).map(function (item) {
+      return <li><Item title={item.title} user={item.user}/></li>;
     });
     return <ul>{items}</ul>;
   }
