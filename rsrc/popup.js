@@ -28,15 +28,30 @@ var Login = React.createClass({
 
 var Item = React.createClass({
   render: function() {
-    return <span>{this.props.title}, {this.props.user}</span>
+    return (<span>{this.props.title}, {this.props.user}</span>);
+  }
+});
+
+var Search = React.createClass({
+  handleChange: function(event) {
+    this.props.updateFilter(event.target.value);
+  },
+  render: function() {
+    return <span><input type="text" onKeyDown={this.handleChange} /></span>
   }
 });
 
 var List = React.createClass({
   render: function() {
     this.props.data = this.props.data || []
+    this.props.filterText = this.props.filterText || ''
+    var that = this
     var isWebform = function(item) {
-      return item.TypeName === 'webforms.WebForm'
+      var show = true
+      if (that.props.filterText) {
+        show = (item.Title.toLowerCase().indexOf(that.props.filterText.toLowerCase())) > -1
+      }
+      return show && item.TypeName === 'webforms.WebForm'
     }
     var items = this.props.data.filter(isWebform).map(function (item) {
       console.log('parse '+item.Title)
@@ -58,6 +73,7 @@ var List = React.createClass({
 var Main = React.createClass({
   getInitialState: function() {
     return {
+      filterText: '',
       authenticated: false,
       data: []
     };
@@ -68,10 +84,19 @@ var Main = React.createClass({
       data: data
     });
   },
+  updateFilter: function(text) {
+    this.setState({
+      filterText: text
+    });
+  },
   render: function() {
+    var components = <Login updateAuth={this.updateAuth} />
+    if (this.state.authenticated) {
+      components = [<span><Search updateFilter={this.updateFilter} /></span>, <span><List data={this.state.data} filterText={this.state.filterText} /></span>]
+    }
     return (
       <div>
-        {this.state.authenticated ? <List data={this.state.data}/> : <Login updateAuth={this.updateAuth} />}
+        {components}
       </div>
     );
   }
