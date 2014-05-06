@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -37,18 +38,22 @@ func login(password []byte) LoginResponse {
 }
 
 func main() {
+	if len(os.Getenv("MULTIPASS_LOGGING")) > 0 {
+		f, err := os.OpenFile("/home/robbie/log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			return
+		}
+		log.SetOutput(f)
+	} else {
+		log.SetOutput(ioutil.Discard)
+	}
+
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("Recovered in f", r)
 		}
 	}()
 
-	f, err := os.OpenFile("/home/robbie/log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		return
-	}
-	//defer f.Close()
-	log.SetOutput(f)
 	for {
 		// get message length, 4 bytes
 		var length uint32
