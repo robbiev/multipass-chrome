@@ -16,13 +16,34 @@ type KeychainResponse struct {
 	Items   []multipass.Item
 }
 
-func getKeychain(password []byte) KeychainResponse {
+type HomeResponse struct {
+	Success bool
+	Home    string
+}
+
+func getHome() (string, error) {
 	usr, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	return usr.HomeDir, nil
+}
+
+func getHomeResponse() HomeResponse {
+	home, err := getHome()
+	if err != nil {
+		log.Println(err)
+		return HomeResponse{Success: false}
+	}
+	return HomeResponse{Success: true, Home: home}
+}
+
+func getKeychain(password []byte) KeychainResponse {
+	home, err := getHome()
 	if err != nil {
 		log.Println(err)
 		return KeychainResponse{Success: false}
 	}
-	home := usr.HomeDir
 	onePasswordDir := path.Join(home, "/Dropbox/1password/1Password.agilekeychain/data/default")
 	keyChain := multipass.NewAgileKeyChain(onePasswordDir)
 	defer keyChain.Close()
