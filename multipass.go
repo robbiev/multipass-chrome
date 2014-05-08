@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/user"
-	"path"
 
 	"github.com/robbiev/multipass"
 )
@@ -38,16 +37,10 @@ func getHomeResponse() HomeResponse {
 	return HomeResponse{Success: true, Home: home}
 }
 
-func getKeychain(password []byte) KeychainResponse {
-	home, err := getHome()
-	if err != nil {
-		log.Println(err)
-		return KeychainResponse{Success: false}
-	}
-	onePasswordDir := path.Join(home, "/Dropbox/1password/1Password.agilekeychain/data/default")
+func getKeychain(onePasswordDir string, password []byte) KeychainResponse {
 	keyChain := multipass.NewAgileKeyChain(onePasswordDir)
 	defer keyChain.Close()
-	err = keyChain.Open(password)
+	err := keyChain.Open(password)
 	response := KeychainResponse{Success: err == nil}
 	if err == nil {
 		var items []multipass.Item
@@ -94,13 +87,20 @@ func main() {
 
 		var command Command
 		json.Unmarshal(message, &command)
-		payload := command.Payload.(map[string]interface{})
 
-		// there's only one message type right now
-		password := []byte(payload["Password"].(string))
-		response := getKeychain(password)
+		var respMessage interface{}
+		if command.Action == "keychain" {
+			payload := command.Payload.(map[string]interface{})
+			password := []byte(payload["Password"].(string))
+			location := payload["Location"].(string)
+			respMessage = getKeychain(location, password)
+		} else if command.Action == "home" {
+			respMessage = getHomeResponse()
+		} else {
+			panic("unknown action")
+		}
 
-		encoded, _ := json.Marshal(response)
+		encoded, _ := json.Marshal(respMessage)
 		binary.Write(os.Stdout, binary.LittleEndian, uint32(len(encoded)))
 		_, err = os.Stdout.Write(encoded)
 		if err != nil {
