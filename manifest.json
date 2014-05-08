@@ -6,12 +6,15 @@
   "author": "Robbie Vanbrabant",
   "short_name": "multipass",
 
+  "options_page": "options.html",
+
   "background": {
     "page": "background.html"
   },
 
   "permissions": [
     "nativeMessaging",
+    "storage",
     "https://*/*"
   ],
 
