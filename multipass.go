@@ -11,23 +11,23 @@ import (
 	"github.com/robbiev/multipass"
 )
 
-type LoginResponse struct {
+type KeychainResponse struct {
 	Success bool
 	Items   []multipass.Item
 }
 
-func login(password []byte) LoginResponse {
+func getKeychain(password []byte) KeychainResponse {
 	usr, err := user.Current()
 	if err != nil {
 		log.Println(err)
-		return LoginResponse{Success: false}
+		return KeychainResponse{Success: false}
 	}
 	home := usr.HomeDir
 	onePasswordDir := path.Join(home, "/Dropbox/1password/1Password.agilekeychain/data/default")
 	keyChain := multipass.NewAgileKeyChain(onePasswordDir)
 	defer keyChain.Close()
 	err = keyChain.Open(password)
-	response := LoginResponse{Success: err == nil}
+	response := KeychainResponse{Success: err == nil}
 	if err == nil {
 		var items []multipass.Item
 		keyChain.ForEachItem(func(p string, f []byte) error {
@@ -59,8 +59,8 @@ func main() {
 
 		// read message
 		message := make([]byte, length)
-		_, e := os.Stdin.Read(message)
-		if e != nil {
+		_, err = os.Stdin.Read(message)
+		if err != nil {
 			break
 		}
 
@@ -75,17 +75,15 @@ func main() {
 		json.Unmarshal(message, &command)
 		payload := command.Payload.(map[string]interface{})
 
+		// there's only one message type right now
 		password := []byte(payload["Password"].(string))
-		response := login(password)
+		response := getKeychain(password)
 
 		encoded, _ := json.Marshal(response)
-
-		// simply echo the message back
 		binary.Write(os.Stdout, binary.LittleEndian, uint32(len(encoded)))
-
-		_, er := os.Stdout.Write(encoded)
-		if er != nil {
-			log.Println(er)
+		_, err = os.Stdout.Write(encoded)
+		if err != nil {
+			log.Println(err)
 			break
 		}
 	}
