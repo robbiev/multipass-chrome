@@ -103,10 +103,29 @@ var Main = React.createClass({
     };
   },
   componentWillMount: function() {
+    var filter = ''
+    var data = memory.get(DATA_KEY)
+    var authenticated = !!data
+    data = data || []
+    if (authenticated) {
+      var that = this
+      memory.replaceCallbacks(DATA_KEY, function(seconds){
+        that.setState({
+          expires: seconds
+        })
+      }, function() {
+        that.setState({
+          filterText: '',
+          authenticated: false,
+          data: [],
+          expires: 0
+        })
+      })
+    }
     this.setState({
-      filterText: this.props.filterText,
-      authenticated: this.props.authenticated,
-      data: this.props.data
+      filterText: filter,
+      authenticated: authenticated,
+      data: data
     })
   },
   updateAuth: function(status, data) {
@@ -147,14 +166,10 @@ var Main = React.createClass({
   }
 });
 
-var filter = ''
-var data = memory.get(DATA_KEY)
-var authenticated = !!data
-data = data || []
 
 /** @jsx React.DOM */
 React.renderComponent(
-  <Main authenticated={authenticated} filterText={filter} data={data} />,
+  <Main />,
   document.getElementById('body')
 )
 

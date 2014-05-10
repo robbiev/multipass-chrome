@@ -57,6 +57,13 @@ var state = (function() {
         candidate.expiryMillis = candidate.expiryMillis + (expirySeconds*1000)
       }
     },
+    replaceCallbacks: function(key, onAge, onExpire) {
+      var candidate = container[key]
+      if (candidate) {
+        candidate.onAge = onAge
+        candidate.onExpire = onExpire
+      }
+    },
     get: function(key) {
       var candidate = container[key]
       if (candidate) {
