@@ -1,21 +1,5 @@
 console.log('multipass started')
 
-chrome.commands.onCommand.addListener(function(command) {
-  console.log('command:', command);
-});
-
-// var port = chrome.runtime.connectNative('org.garbagecollected.multipass');
-
-// port.onMessage.addListener(function(msg) {
-//   console.log("Received" + msg.Success);
-//   toClipboard(msg.text)
-// });
-
-// port.onDisconnect.addListener(function() {
-//   console.log("Disconnected, reloading extension");
-//   //chrome.runtime.reload()
-// });
-
 function login(password, callback) {
   getDefaultDir(function(defaultDir) {
     chrome.storage.local.get({
@@ -37,6 +21,56 @@ function copy(str) {
   document.execCommand('copy');
   sandbox.value = ''
 }
+
+var state = (function() {
+  var container = {}
+  var now = function() { return new Date().getTime() }
+
+  setInterval(function() {
+    console.log("interval")
+    var nowMillis = now()
+    for (var key in container) {
+      if (container.hasOwnProperty(key)) {
+        var val = container[key]
+        var timeleft = (val.createdMillis + val.expiryMillis) - nowMillis
+        if (timeleft <= 0) {
+          val.onExpire()
+          delete container[key]
+        } else {
+          val.onAge(timeleft/1000)
+        }
+      }
+    }
+  }, 1000)
+  return {
+    set: function(key, value, expirySeconds, onAge, onExpire) {
+      container[key] = { 
+        value: value,
+        createdMillis: now(),
+        expiryMillis: expirySeconds*1000,
+        onAge: onAge,
+        onExpire: onExpire
+      }
+    },
+    incrementExpiry: function(key, expirySeconds) {
+      var candidate = container[key]
+      if (candidate) {
+        candidate.expiryMillis = candidate.expiryMillis + (expirySeconds*1000)
+      }
+    },
+    get: function(key) {
+      var candidate = container[key]
+      if (candidate) {
+        return candidate.value
+      } else {
+        return undefined
+      }
+    },
+    remove: function(key) {
+      delete container[key]
+    }
+  }
+})()
 
 function getDefaultDir(callback) {
   home(function(resp) {
