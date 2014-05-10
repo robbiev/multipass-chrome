@@ -27,15 +27,14 @@ var state = (function() {
   var now = function() { return new Date().getTime() }
 
   setInterval(function() {
-    console.log("interval")
     var nowMillis = now()
     for (var key in container) {
       if (container.hasOwnProperty(key)) {
         var val = container[key]
         var timeleft = (val.createdMillis + val.expiryMillis) - nowMillis
         if (timeleft <= 0) {
-          val.onExpire()
           delete container[key]
+          val.onExpire()
         } else {
           val.onAge(timeleft/1000)
         }

@@ -1,8 +1,12 @@
 /** @jsx React.DOM */
+
+// global state to keep data until it times out
+var memory = chrome.extension.getBackgroundPage().state
+var DATA_KEY = "keychain_data"
+
 var Login = React.createClass({
   handleChange: function(event) {
     if (event.keyCode == 13) { 
-      //event.preventDefault()
       console.log("event enter")
       var that = this
       var target = event.target
@@ -11,7 +15,6 @@ var Login = React.createClass({
           console.log("update auth")
           that.props.updateAuth(true, resp.Items)
           console.log(JSON.stringify(resp.Items, null, 4))
-          //that.props.updateData()
         }
         target.value = ''
       }) 
@@ -86,19 +89,41 @@ var List = React.createClass({
     var items = this.state.items.filter(isInFilter).map(function (item) {
       return <li><Item title={item.title} user={item.user} password={item.password}/></li>;
     });
-    return <ul>{items}</ul>;
+    return <ul>{this.props.expires}{items}</ul>;
   }
 });
 
 var Main = React.createClass({
   getInitialState: function() {
     return {
-      filterText: '',
-      authenticated: false,
-      data: []
+      filterText: this.props.filterText,
+      authenticated: this.props.authenticated,
+      data: this.props.data,
+      expires: 0
     };
   },
+  componentWillMount: function() {
+    this.setState({
+      filterText: this.props.filterText,
+      authenticated: this.props.authenticated,
+      data: this.props.data
+    })
+  },
   updateAuth: function(status, data) {
+    var that = this
+    memory.set(DATA_KEY, data, 20, function(seconds){
+      that.setState({
+        expires: seconds
+      })
+    }, function() {
+      that.setState({
+        filterText: '',
+        authenticated: false,
+        data: [],
+        expires: 0
+      })
+    })
+
     this.setState({
       authenticated: status,
       data: data
@@ -112,7 +137,7 @@ var Main = React.createClass({
   render: function() {
     var components = <Login updateAuth={this.updateAuth} />
     if (this.state.authenticated) {
-      components = [<span><Search updateFilter={this.updateFilter} /></span>, <span><List data={this.state.data} filterText={this.state.filterText} /></span>]
+      components = [<span><Search updateFilter={this.updateFilter} /></span>, <span><List data={this.state.data} filterText={this.state.filterText} expires={this.state.expires} /></span>]
     }
     return (
       <div>
@@ -122,9 +147,19 @@ var Main = React.createClass({
   }
 });
 
+var filter = ''
+var data = memory.get(DATA_KEY)
+var authenticated = !!data
+data = data || []
 
 /** @jsx React.DOM */
 React.renderComponent(
-  <Main />,
+  <Main authenticated={authenticated} filterText={filter} data={data} />,
   document.getElementById('body')
 )
+
+// memory.set("blah", "meh", 20, function(seconds){
+//   console.log("time left: "+seconds)
+// }, function() {
+//   console.log("expired!")
+// })
