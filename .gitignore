@@ -1,4 +1,5 @@
 multipass
 multipass-chrome
 log.txt
-rbin
+extension/rbin
+*.zip
