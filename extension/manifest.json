@@ -13,6 +13,7 @@
   },
 
   "permissions": [
+    "idle",
     "nativeMessaging",
     "storage",
     "https://*/*"

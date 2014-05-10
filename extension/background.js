@@ -25,18 +25,47 @@ function copy(str) {
 var state = (function() {
   var container = {}
   var now = function() { return new Date().getTime() }
-
-  setInterval(function() {
-    var nowMillis = now()
-    for (var key in container) {
-      if (container.hasOwnProperty(key)) {
-        var val = container[key]
-        var timeleft = (val.createdMillis + val.expiryMillis) - nowMillis
-        if (timeleft <= 0) {
+  // active, idle, locked
+  var checkIdle = false
+  chrome.idle.setDetectionInterval(15)
+  chrome.idle.onStateChanged.addListener(function(s) {
+    machineState = s
+    if (s === 'idle') {
+      checkIdle = true
+      for (var key in container) {
+        if (container.hasOwnProperty(key)) {
+          var val = container[key]
+          val.createdMillis = now()
+        }
+      }
+    } else if (s === 'locked') {
+      checkIdle = false
+      for (var key in container) {
+        if (container.hasOwnProperty(key)) {
+          var val = container[key]
           delete container[key]
           val.onExpire()
-        } else {
-          val.onAge(Math.round(timeleft/1000))
+        }
+      }
+    } else {
+      // active
+      checkIdle = false
+    }
+  })
+
+  setInterval(function() {
+    if (checkIdle) {
+      var nowMillis = now()
+      for (var key in container) {
+        if (container.hasOwnProperty(key)) {
+          var val = container[key]
+          var timeleft = (val.createdMillis + val.expiryMillis) - nowMillis
+          if (timeleft <= 0) {
+            delete container[key]
+            val.onExpire()
+          } else {
+            val.onAge(Math.round(timeleft/1000))
+          }
         }
       }
     }
