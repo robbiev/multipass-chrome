@@ -36,7 +36,7 @@ var state = (function() {
           delete container[key]
           val.onExpire()
         } else {
-          val.onAge(timeleft/1000)
+          val.onAge(Math.round(timeleft/1000))
         }
       }
     }

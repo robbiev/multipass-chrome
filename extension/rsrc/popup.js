@@ -14,7 +14,7 @@ var Login = React.createClass({
         if (resp.Success) {
           console.log("update auth")
           that.props.updateAuth(true, resp.Items)
-          console.log(JSON.stringify(resp.Items, null, 4))
+          //console.log(JSON.stringify(resp.Items, null, 4))
         }
         target.value = ''
       }) 
@@ -89,7 +89,7 @@ var List = React.createClass({
     var items = this.state.items.filter(isInFilter).map(function (item) {
       return <li><Item title={item.title} user={item.user} password={item.password}/></li>;
     });
-    return <ul>{this.props.expires}{items}</ul>;
+    return <div>Automatic unlock: {this.props.expires}s<ul>{items}</ul></div>;
   }
 });
 
