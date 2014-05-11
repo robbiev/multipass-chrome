@@ -89,7 +89,7 @@ var List = React.createClass({
     var items = this.state.items.filter(isInFilter).map(function (item) {
       return <li><Item title={item.title} user={item.user} password={item.password}/></li>;
     });
-    return <div>Automatic unlock: {this.props.expires}s<ul>{items}</ul></div>;
+    return <ul>{items}</ul>;
   }
 });
 
@@ -98,8 +98,7 @@ var Main = React.createClass({
     return {
       filterText: this.props.filterText,
       authenticated: this.props.authenticated,
-      data: this.props.data,
-      expires: 0
+      data: this.props.data
     };
   },
   componentWillMount: function() {
@@ -109,16 +108,11 @@ var Main = React.createClass({
     data = data || []
     if (authenticated) {
       var that = this
-      memory.replaceCallbacks(DATA_KEY, function(seconds){
-        that.setState({
-          expires: seconds
-        })
-      }, function() {
+      memory.replaceCallbacks(DATA_KEY, function() {
         that.setState({
           filterText: '',
           authenticated: false,
-          data: [],
-          expires: 0
+          data: []
         })
       })
     }
@@ -130,16 +124,11 @@ var Main = React.createClass({
   },
   updateAuth: function(status, data) {
     var that = this
-    memory.set(DATA_KEY, data, 20, function(seconds){
-      that.setState({
-        expires: seconds
-      })
-    }, function() {
+    memory.set(DATA_KEY, data, function() {
       that.setState({
         filterText: '',
         authenticated: false,
-        data: [],
-        expires: 0
+        data: []
       })
     })
 
@@ -156,7 +145,7 @@ var Main = React.createClass({
   render: function() {
     var components = <Login updateAuth={this.updateAuth} />
     if (this.state.authenticated) {
-      components = [<span><Search updateFilter={this.updateFilter} /></span>, <span><List data={this.state.data} filterText={this.state.filterText} expires={this.state.expires} /></span>]
+      components = [<span><Search updateFilter={this.updateFilter} /></span>, <span><List data={this.state.data} filterText={this.state.filterText} /></span>]
     }
     return (
       <div>
@@ -172,9 +161,3 @@ React.renderComponent(
   <Main />,
   document.getElementById('body')
 )
-
-// memory.set("blah", "meh", 20, function(seconds){
-//   console.log("time left: "+seconds)
-// }, function() {
-//   console.log("expired!")
-// })

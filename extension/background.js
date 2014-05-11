@@ -24,22 +24,11 @@ function copy(str) {
 
 var state = (function() {
   var container = {}
-  var now = function() { return new Date().getTime() }
-  // active, idle, locked
-  var checkIdle = false
+
   chrome.idle.setDetectionInterval(15)
   chrome.idle.onStateChanged.addListener(function(s) {
-    machineState = s
-    if (s === 'idle') {
-      checkIdle = true
-      for (var key in container) {
-        if (container.hasOwnProperty(key)) {
-          var val = container[key]
-          val.createdMillis = now()
-        }
-      }
-    } else if (s === 'locked') {
-      checkIdle = false
+    // active, idle, locked
+    if (s !== 'active') {
       for (var key in container) {
         if (container.hasOwnProperty(key)) {
           var val = container[key]
@@ -47,49 +36,19 @@ var state = (function() {
           val.onExpire()
         }
       }
-    } else {
-      // active
-      checkIdle = false
     }
   })
 
-  setInterval(function() {
-    if (checkIdle) {
-      var nowMillis = now()
-      for (var key in container) {
-        if (container.hasOwnProperty(key)) {
-          var val = container[key]
-          var timeleft = (val.createdMillis + val.expiryMillis) - nowMillis
-          if (timeleft <= 0) {
-            delete container[key]
-            val.onExpire()
-          } else {
-            val.onAge(Math.round(timeleft/1000))
-          }
-        }
-      }
-    }
-  }, 1000)
   return {
-    set: function(key, value, expirySeconds, onAge, onExpire) {
+    set: function(key, value, onExpire) {
       container[key] = { 
         value: value,
-        createdMillis: now(),
-        expiryMillis: expirySeconds*1000,
-        onAge: onAge,
         onExpire: onExpire
       }
     },
-    incrementExpiry: function(key, expirySeconds) {
+    replaceCallbacks: function(key, onExpire) {
       var candidate = container[key]
       if (candidate) {
-        candidate.expiryMillis = candidate.expiryMillis + (expirySeconds*1000)
-      }
-    },
-    replaceCallbacks: function(key, onAge, onExpire) {
-      var candidate = container[key]
-      if (candidate) {
-        candidate.onAge = onAge
         candidate.onExpire = onExpire
       }
     },
