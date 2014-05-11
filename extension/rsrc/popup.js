@@ -40,7 +40,7 @@ var Search = React.createClass({
     this.props.updateFilter(event.target.value);
   },
   render: function() {
-    return <span><input type="text" onChange={this.handleChange} /></span>
+    return <span><div id="search-txt"><input type="text" onChange={this.handleChange} /></div><input type="button" id="lock-btn" onClick={this.props.lock} value="lock"/></span>
   }
 });
 
@@ -109,11 +109,7 @@ var Main = React.createClass({
     if (authenticated) {
       var that = this
       memory.replaceCallbacks(DATA_KEY, function() {
-        that.setState({
-          filterText: '',
-          authenticated: false,
-          data: []
-        })
+        that.setState(that.resetState())
       })
     }
     this.setState({
@@ -122,15 +118,20 @@ var Main = React.createClass({
       data: data
     })
   },
+  lock: function() {
+    memory.remove(DATA_KEY)
+    this.setState(this.resetState())
+  },
+  resetState: function() {
+    return {
+      filterText: '',
+      authenticated: false,
+      data: []
+    }
+  },
   updateAuth: function(status, data) {
     var that = this
-    memory.set(DATA_KEY, data, function() {
-      that.setState({
-        filterText: '',
-        authenticated: false,
-        data: []
-      })
-    })
+    memory.set(DATA_KEY, data, function() { that.setState(that.resetState()) })
 
     this.setState({
       authenticated: status,
@@ -145,7 +146,7 @@ var Main = React.createClass({
   render: function() {
     var components = <Login updateAuth={this.updateAuth} />
     if (this.state.authenticated) {
-      components = [<span><Search updateFilter={this.updateFilter} /></span>, <span><List data={this.state.data} filterText={this.state.filterText} /></span>]
+      components = [<span><Search updateFilter={this.updateFilter} lock={this.lock} /></span>, <span><List data={this.state.data} filterText={this.state.filterText} /></span>]
     }
     return (
       <div>
