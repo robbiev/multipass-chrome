@@ -6,8 +6,10 @@ function init() {
 // Saves options to chrome.storage
 function save_options() {
   var keychain = document.getElementById('keychain').value
+  var idle = document.getElementById('idle').value
   chrome.storage.local.set({
-    keychain: keychain
+    keychain: keychain,
+    idle: idle
   }, function() {
     // Update status to let user know options were saved.
     var status = document.getElementById('status')
@@ -22,12 +24,14 @@ function save_options() {
 // stored in chrome.storage.
 function restore_options(home) {
   chrome.storage.local.get({
-    keychain: home+'/Dropbox/1password/1Password.agilekeychain/data/default'
+    keychain: home+'/Dropbox/1password/1Password.agilekeychain/data/default',
+    idle: 5 * 60
   }, function(items) {
     if (chrome.runtime.lastError) {
       console.log(lastError)
     }
     document.getElementById('keychain').value = items.keychain
+    document.getElementById('idle').value = items.idle
   });
 }
 
