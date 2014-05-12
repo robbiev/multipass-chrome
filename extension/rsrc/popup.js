@@ -40,7 +40,7 @@ var Search = React.createClass({
     this.props.updateFilter(event.target.value);
   },
   render: function() {
-    return <span><div id="search-txt"><input type="text" onChange={this.handleChange} /></div><input type="button" id="lock-btn" onClick={this.props.lock} value="lock"/></span>
+    return <span><input type="button" id="lock-btn" onClick={this.props.lock} value="lock"/><div id="search-txt"><input type="text" onChange={this.handleChange} /></div></span>
   }
 });
 

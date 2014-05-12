@@ -4,7 +4,6 @@ body {
 
 input[type=password], input[type=text] {
   width: 100%;
-  float: left;
 }
 
 #lock-btn {
