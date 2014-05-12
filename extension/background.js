@@ -25,7 +25,7 @@ function copy(str) {
 var state = (function() {
   var container = {}
 
-  chrome.idle.setDetectionInterval(15)
+  chrome.idle.setDetectionInterval(60 * 5)
   chrome.idle.onStateChanged.addListener(function(s) {
     // active, idle, locked
     if (s !== 'active') {
