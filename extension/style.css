@@ -13,3 +13,8 @@ input[type=password], input[type=text] {
 #search-txt {
   overflow: hidden;
 }
+
+#number-txt {
+  display: inline;
+  width: 50px;
+}

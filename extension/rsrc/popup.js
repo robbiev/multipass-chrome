@@ -30,8 +30,15 @@ var Item = React.createClass({
   copyPassword: function(event) {
     chrome.extension.getBackgroundPage().copy(this.props.password)
   },
+  selectNumbers: function(event) {
+    var string = event.target.value
+    var numbers = string.split(' ').map(function(n) { return parseInt(n, 10) })
+    var password = this.props.password
+    var pwdChars = numbers.map(function(n) { return password[n - 1] }).join('')
+    event.target.value = pwdChars
+  },
   render: function() {
-    return (<div>{this.props.title} | {this.props.user} <button onClick={this.copyPassword}>password</button></div>);
+    return (<div>{this.props.title} | {this.props.user} <button onClick={this.copyPassword}>password</button><input id="number-txt" type="text" onClick={this.selectNumbers} /></div>);
   }
 });
 
