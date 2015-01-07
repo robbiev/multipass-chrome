@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"runtime/debug"
 
 	"github.com/robbiev/multipass"
 )
@@ -59,7 +60,8 @@ func getKeychain(onePasswordDir string, password []byte) KeychainResponse {
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("Recovered in f", r)
+			log.Println("Recovered in main", r)
+			log.Printf("%s\n", debug.Stack())
 		}
 	}()
 
