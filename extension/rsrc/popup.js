@@ -5,6 +5,11 @@ var memory = chrome.extension.getBackgroundPage().state
 var DATA_KEY = "keychain_data"
 
 var Login = React.createClass({
+  componentDidMount: function() {
+    // only one input at this point so focus on that
+    var input = document.getElementsByTagName('input')[0]
+    input.focus()
+  },
   handleChange: function(event) {
     if (event.keyCode == 13) { 
       console.log("event enter")
@@ -45,6 +50,11 @@ var Item = React.createClass({
 var Search = React.createClass({
   handleChange: function(event) {
     this.props.updateFilter(event.target.value);
+  },
+  componentDidMount: function() {
+    var searchTxtDiv = document.getElementById('search-txt')
+    var input = searchTxtDiv.getElementsByTagName('input')[0]
+    input.focus()
   },
   render: function() {
     return <span><input type="button" id="lock-btn" onClick={this.props.lock} value="lock"/><div id="search-txt"><input type="text" onChange={this.handleChange} /></div></span>
