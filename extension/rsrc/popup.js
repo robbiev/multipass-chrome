@@ -62,6 +62,12 @@ var List = React.createClass({
     var isWebform = function(item) {
       return item.TypeName === 'webforms.WebForm'
     }
+    var isPassword = function(item) {
+      return item.TypeName === 'passwords.Password'
+    }
+    var or = function(one, two) {
+      return function(item) { return one(item) || two(item) }
+    }
     var getDesignation = function(payload, designation) {
       var userField = payload.fields.filter(function(f) { return f.designation === designation}).map(function(f) {return f.value})
       var user = '<unknown>'
@@ -71,15 +77,21 @@ var List = React.createClass({
       return user
     }
 
-    var items = this.props.data.filter(isWebform).map(function (item) {
-      console.log('parse '+item.Title)
+    var items = this.props.data.filter(or(isWebform, isPassword)).map(function (item) {
+      //console.log('parse '+item.Title)
       var payload = JSON.parse(item.Payload)
-      var fields = payload.fields || []
-      var user = getDesignation(payload, 'username')
-      var password = getDesignation(payload, 'password')
-      console.log('end parse '+item.Title)
+      var user, password
+      if (isWebform(item)) {
+        var fields = payload.fields || []
+        user = getDesignation(payload, 'username')
+        password = getDesignation(payload, 'password')
+      } else if (isPassword(item)) {
+        user = ''
+        password = payload.password
+      }
+      //console.log('end parse '+item.Title)
       return { title: item.Title, user: user, password: password }
-    });
+    })
 
     this.setState({ items: items })
   },
