@@ -26,8 +26,8 @@ var Login = React.createClass({
     }
   },
   render: function() {
-    return (<span><p>Enter your password</p>
-            <input type="password" onKeyDown={this.handleChange} /></span>);
+    return (<div className="login"><p>Enter your password</p>
+            <input type="password" onKeyDown={this.handleChange} /></div>);
   }
 })
 
@@ -43,7 +43,11 @@ var Item = React.createClass({
     event.target.value = pwdChars
   },
   render: function() {
-    return (<div>{this.props.title} | {this.props.user} <button onClick={this.copyPassword}>password</button><input id="number-txt" type="text" onClick={this.selectNumbers} /></div>);
+    var text = ""
+    if  (this.props.user) {
+      text = " (" + this.props.user + ")"
+    }
+    return (<span><button onClick={this.copyPassword}>password</button><input id="number-txt" type="text" onClick={this.selectNumbers} />&nbsp;<span className="item-text" title={this.props.title + text}><b>{this.props.type}</b> {this.props.title}{text}</span></span>);
   }
 });
 
@@ -57,7 +61,7 @@ var Search = React.createClass({
     input.focus()
   },
   render: function() {
-    return <span><input type="button" id="lock-btn" onClick={this.props.lock} value="lock"/><div id="search-txt"><input type="text" onChange={this.handleChange} /></div></span>
+    return <div className="search"><input type="button" id="lock-btn" onClick={this.props.lock} value="lock"/><div id="search-txt"><input type="text" onChange={this.handleChange} /></div></div>
   }
 });
 
@@ -90,17 +94,19 @@ var List = React.createClass({
     var items = this.props.data.filter(or(isWebform, isPassword)).map(function (item) {
       //console.log('parse '+item.Title)
       var payload = JSON.parse(item.Payload)
-      var user, password
+      var user, password, type
       if (isWebform(item)) {
         var fields = payload.fields || []
         user = getDesignation(payload, 'username')
         password = getDesignation(payload, 'password')
+        type = 'W'
       } else if (isPassword(item)) {
         user = ''
         password = payload.password
+        type = 'P'
       }
       //console.log('end parse '+item.Title)
-      return { title: item.Title, user: user, password: password }
+      return { title: item.Title, user: user, password: password, type: type }
     })
 
     this.setState({ items: items })
@@ -116,9 +122,9 @@ var List = React.createClass({
       return show
     }
     var items = this.state.items.filter(isInFilter).map(function (item) {
-      return <li><Item title={item.title} user={item.user} password={item.password}/></li>;
+      return <li className="item"><Item title={item.title} user={item.user} password={item.password} type={item.type} /></li>;
     });
-    return <ul>{items}</ul>;
+    return <ul className="list">{items}</ul>;
   }
 });
 
@@ -175,10 +181,10 @@ var Main = React.createClass({
   render: function() {
     var components = <Login updateAuth={this.updateAuth} />
     if (this.state.authenticated) {
-      components = [<span><Search updateFilter={this.updateFilter} lock={this.lock} /></span>, <span><List data={this.state.data} filterText={this.state.filterText} /></span>]
+      components = [<Search updateFilter={this.updateFilter} lock={this.lock} />, <List data={this.state.data} filterText={this.state.filterText} />]
     }
     return (
-      <div>
+      <div className="main">
         {components}
       </div>
     );

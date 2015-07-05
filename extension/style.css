@@ -14,6 +14,17 @@ input[type=password], input[type=text] {
   overflow: hidden;
 }
 
+ul {
+  /* list-style-position: inside; */
+  padding: 0px;
+}
+
+li.item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 #number-txt {
   display: inline;
   width: 50px;
